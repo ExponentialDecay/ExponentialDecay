@@ -3,789 +3,1064 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rhythm Game</title>
+    <title>Zombie Survival</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
             color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .game-title {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            text-align: center;
-            text-shadow: 0 0 10px rgba(0, 150, 255, 0.7);
-            background: linear-gradient(to right, #00b4db, #0083b0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .container {
-            display: flex;
-            width: 100%;
-            max-width: 1200px;
-            gap: 20px;
-        }
-
-        .left-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .game-area {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .panel {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel-title {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #4cc9f0;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 8px;
-        }
-
-        .song-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .song-item {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .song-item:hover {
-            background: rgba(0, 0, 0, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .song-item.active {
-            border-color: #4cc9f0;
-            background: rgba(76, 201, 240, 0.2);
-        }
-
-        .song-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-
-        .song-difficulty {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-top: 5px;
-        }
-
-        .settings-option {
-            margin-bottom: 15px;
-        }
-
-        .settings-option label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .slider-container input {
-            flex: 1;
-        }
-
-        .slider-value {
-            width: 40px;
-            text-align: center;
-        }
-
-        select, button {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        select:hover, button:hover {
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        button {
-            background: linear-gradient(to right, #00b4db, #0083b0);
-            font-size: 1rem;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 180, 219, 0.4);
-        }
-
-        .game-board {
-            width: 100%;
-            height: 500px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            position: relative;
             overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            user-select: none;
         }
-
-        .lanes {
-            display: flex;
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #uiContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            position: relative;
+            pointer-events: none;
+            z-index: 10;
         }
-
-        .lane {
-            flex: 1;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .lane:last-child {
-            border-right: none;
-        }
-
-        .hit-line {
+        
+        #hud {
             position: absolute;
-            bottom: 100px;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+            bottom: 20px;
+            left: 20px;
+            font-size: 18px;
         }
-
-        .note {
+        
+        #weaponInfo {
             position: absolute;
-            width: 80%;
-            height: 30px;
-            left: 10%;
-            border-radius: 5px;
-            background: #4cc9f0;
-            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
-            transition: transform 0.1s;
+            bottom: 20px;
+            right: 20px;
+            text-align: right;
         }
-
-        .score-display {
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-align: center;
+        
+        #healthBar {
+            width: 200px;
+            height: 20px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 2px solid white;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
         }
-
-        .combo-display {
-            font-size: 1.2rem;
-            text-align: center;
-            color: #4cc9f0;
-            margin-bottom: 20px;
-        }
-
-        .game-stats {
-            display: flex;
-            justify-content: space-between;
+        
+        #healthFill {
+            height: 100%;
             width: 100%;
-            margin-top: 10px;
+            background: linear-gradient(to right, #ff0000, #00ff00);
+            transition: width 0.3s;
         }
-
-        .stat {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 10px;
-            flex: 1;
-            margin: 0 5px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
+        
+        #ammoCount {
+            font-size: 24px;
             font-weight: bold;
-            color: #4cc9f0;
         }
-
-        .instructions {
-            margin-top: 20px;
+        
+        #waveInfo {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
             text-align: center;
-            color: #aaa;
-            font-size: 0.9rem;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
-
-        .skin-preview {
+        
+        #powerupIndicator {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            color: yellow;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        #gameOverScreen, #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .skin-sample {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
             align-items: center;
-            justify-content: center;
+            z-index: 20;
+        }
+        
+        #startScreen {
+            background: radial-gradient(circle, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #e94560;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+        
+        h2 {
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #e94560;
+        }
+        
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            pointer-events: auto;
+        }
+        
+        button:hover {
+            background: #ff6b81;
+            transform: scale(1.05);
+        }
+        
+        #instructions {
+            max-width: 600px;
+            text-align: center;
+            margin-top: 30px;
+            line-height: 1.6;
+            color: #aaa;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+        }
+        
+        #crosshair::before, #crosshair::after {
+            content: '';
+            position: absolute;
+            background: white;
+        }
+        
+        #crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        #crosshair::after {
+            width: 20px;
+            height: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        #hitMarker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            opacity: 0;
+        }
+        
+        #hitMarker::before, #hitMarker::after {
+            content: '';
+            position: absolute;
+            background: red;
+        }
+        
+        #hitMarker::before {
+            width: 3px;
+            height: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        #hitMarker::after {
+            width: 30px;
+            height: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .damageNumber {
+            position: absolute;
+            color: #ff6b6b;
             font-weight: bold;
-            background: #4cc9f0;
-            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 15;
+            text-shadow: 1px 1px 2px black;
+            animation: floatUp 1s forwards;
         }
-
-        .skin-sample.circle {
-            border-radius: 50%;
-        }
-
-        .skin-sample.arrow {
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
             }
-            
-            .game-board {
-                height: 400px;
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
             }
         }
     </style>
 </head>
 <body>
-    <h1 class="game-title">Rhythm Game</h1>
-    
-    <div class="container">
-        <div class="left-panel">
-            <div class="panel song-selector">
-                <h2 class="panel-title">Song Selection</h2>
-                <div class="song-list">
-                    <div class="song-item active" data-song="0">
-                        <div class="song-title">Melodic Dreams</div>
-                        <div class="song-difficulty">Difficulty: Easy</div>
-                    </div>
-                    <div class="song-item" data-song="1">
-                        <div class="song-title">Rhythm Rush</div>
-                        <div class="song-difficulty">Difficulty: Medium</div>
-                    </div>
-                    <div class="song-item" data-song="2">
-                        <div class="song-title">Beat Blitz</div>
-                        <div class="song-difficulty">Difficulty: Hard</div>
-                    </div>
+    <div id="gameContainer">
+        <div id="uiContainer">
+            <div id="hud">
+                <div id="healthBar">
+                    <div id="healthFill"></div>
                 </div>
+                <div>Points: <span id="points">0</span></div>
+                <div>Wave: <span id="wave">1</span></div>
+                <div>Zombies Left: <span id="zombiesLeft">0</span></div>
             </div>
             
-            <div class="panel settings">
-                <h2 class="panel-title">Game Settings</h2>
-                
-                <div class="settings-option">
-                    <label for="speed">Scroll Speed</label>
-                    <div class="slider-container">
-                        <input type="range" id="speed" min="1" max="10" value="5">
-                        <span class="slider-value" id="speed-value">5</span>
-                    </div>
-                </div>
-                
-                <div class="settings-option">
-                    <label for="skin">Note Skin</label>
-                    <select id="skin">
-                        <option value="arrow">Arrows</option>
-                        <option value="circle">Circles</option>
-                        <option value="square">Squares</option>
-                    </select>
-                    <div class="skin-preview">
-                        <div class="skin-sample arrow">↓</div>
-                        <div class="skin-sample circle">●</div>
-                        <div class="skin-sample square">■</div>
-                    </div>
-                </div>
-                
-                <button id="start-btn">Start Game</button>
-                <button id="pause-btn">Pause</button>
+            <div id="weaponInfo">
+                <div id="weaponName">Pistol</div>
+                <div id="ammoCount">12 / 60</div>
             </div>
             
-            <div class="panel instructions">
-                <h2 class="panel-title">How to Play</h2>
-                <p>Press the keys <strong>D, F, J, K</strong> to hit the notes as they reach the hit line.</p>
-                <p>Timing is everything! Perfect hits give more points.</p>
-                <p>Adjust the scroll speed to match your preference.</p>
-            </div>
+            <div id="waveInfo">Wave 1</div>
+            <div id="powerupIndicator">Double Damage Active!</div>
+            
+            <div id="crosshair"></div>
+            <div id="hitMarker"></div>
         </div>
         
-        <div class="game-area">
-            <div class="score-display">Score: <span id="score">0</span></div>
-            <div class="combo-display">Combo: <span id="combo">0</span>x</div>
-            
-            <div class="game-board">
-                <div class="lanes">
-                    <div class="lane" data-key="D"></div>
-                    <div class="lane" data-key="F"></div>
-                    <div class="lane" data-key="J"></div>
-                    <div class="lane" data-key="K"></div>
-                    <div class="hit-line"></div>
-                </div>
-            </div>
-            
-            <div class="game-stats">
-                <div class="stat">
-                    <div>Perfect</div>
-                    <div class="stat-value" id="perfect-count">0</div>
-                </div>
-                <div class="stat">
-                    <div>Good</div>
-                    <div class="stat-value" id="good-count">0</div>
-                </div>
-                <div class="stat">
-                    <div>Miss</div>
-                    <div class="stat-value" id="miss-count">0</div>
-                </div>
-            </div>
+        <div id="startScreen">
+            <h1>ZOMBIE SURVIVAL</h1>
+            <p id="instructions">
+                Survive endless waves of zombies!<br>
+                Use WASD to move, mouse to aim, and left-click to shoot.<br>
+                Collect power-ups for temporary advantages.<br>
+                Switch weapons with number keys 1-4.
+            </p>
+            <button id="startButton">START GAME</button>
+        </div>
+        
+        <div id="gameOverScreen" class="hidden">
+            <h2>GAME OVER</h2>
+            <p>You survived <span id="finalWave">0</span> waves</p>
+            <p>Points: <span id="finalPoints">0</span></p>
+            <button id="restartButton">PLAY AGAIN</button>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         // Game variables
-        let score = 0;
-        let combo = 0;
-        let gameActive = false;
-        let gamePaused = false;
-        let currentSong = 0;
-        let scrollSpeed = 5;
-        let noteSkin = 'arrow';
-        
-        // Statistics
-        let perfectCount = 0;
-        let goodCount = 0;
-        let missCount = 0;
+        let scene, camera, renderer;
+        let player, zombies = [], bullets = [], powerups = [];
+        let weapons = [];
+        let currentWeaponIndex = 0;
+        let points = 0;
+        let wave = 1;
+        let zombiesInWave = 5;
+        let zombiesKilledThisWave = 0;
+        let playerHealth = 100;
+        let gameOver = false;
+        let powerupActive = false;
+        let powerupType = '';
+        let powerupTimer = 0;
         
         // DOM elements
-        const scoreElement = document.getElementById('score');
-        const comboElement = document.getElementById('combo');
-        const startButton = document.getElementById('start-btn');
-        const pauseButton = document.getElementById('pause-btn');
-        const speedSlider = document.getElementById('speed');
-        const speedValue = document.getElementById('speed-value');
-        const skinSelect = document.getElementById('skin');
-        const perfectCountElement = document.getElementById('perfect-count');
-        const goodCountElement = document.getElementById('good-count');
-        const missCountElement = document.getElementById('miss-count');
-        const lanes = document.querySelectorAll('.lane');
-        const songItems = document.querySelectorAll('.song-item');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const pointsDisplay = document.getElementById('points');
+        const waveDisplay = document.getElementById('wave');
+        const zombiesLeftDisplay = document.getElementById('zombiesLeft');
+        const healthFill = document.getElementById('healthFill');
+        const weaponNameDisplay = document.getElementById('weaponName');
+        const ammoCountDisplay = document.getElementById('ammoCount');
+        const waveInfoDisplay = document.getElementById('waveInfo');
+        const powerupIndicator = document.getElementById('powerupIndicator');
+        const finalWaveDisplay = document.getElementById('finalWave');
+        const finalPointsDisplay = document.getElementById('finalPoints');
+        const hitMarker = document.getElementById('hitMarker');
         
-        // Note data for each song (time in seconds, lane index 0-3)
-        const songs = [
-            {
-                title: "Melodic Dreams",
-                difficulty: "Easy",
-                notes: [
-                    { time: 1, lane: 0 },
-                    { time: 1.5, lane: 1 },
-                    { time: 2, lane: 2 },
-                    { time: 2.5, lane: 3 },
-                    { time: 3, lane: 0 },
-                    { time: 3.5, lane: 1 },
-                    { time: 4, lane: 2 },
-                    { time: 4.5, lane: 3 },
-                    { time: 5, lane: 0 },
-                    { time: 5.5, lane: 1 },
-                    { time: 6, lane: 2 },
-                    { time: 6.5, lane: 3 },
-                    { time: 7, lane: 0 },
-                    { time: 7.5, lane: 1 },
-                    { time: 8, lane: 2 },
-                    { time: 8.5, lane: 3 },
-                    { time: 9, lane: 0 },
-                    { time: 9.5, lane: 1 },
-                    { time: 10, lane: 2 },
-                    { time: 10.5, lane: 3 }
-                ]
-            },
-            {
-                title: "Rhythm Rush",
-                difficulty: "Medium",
-                notes: [
-                    { time: 1, lane: 0 },
-                    { time: 1.2, lane: 1 },
-                    { time: 1.4, lane: 2 },
-                    { time: 1.6, lane: 3 },
-                    { time: 2, lane: 0 },
-                    { time: 2.2, lane: 1 },
-                    { time: 2.4, lane: 2 },
-                    { time: 2.6, lane: 3 },
-                    { time: 3, lane: 0 },
-                    { time: 3.2, lane: 1 },
-                    { time: 3.4, lane: 2 },
-                    { time: 3.6, lane: 3 },
-                    { time: 4, lane: 0 },
-                    { time: 4.2, lane: 1 },
-                    { time: 4.4, lane: 2 },
-                    { time: 4.6, lane: 3 },
-                    { time: 5, lane: 0 },
-                    { time: 5.2, lane: 1 },
-                    { time: 5.4, lane: 2 },
-                    { time: 5.6, lane: 3 },
-                    { time: 6, lane: 0 },
-                    { time: 6.2, lane: 1 },
-                    { time: 6.4, lane: 2 },
-                    { time: 6.6, lane: 3 }
-                ]
-            },
-            {
-                title: "Beat Blitz",
-                difficulty: "Hard",
-                notes: [
-                    { time: 0.5, lane: 0 },
-                    { time: 0.7, lane: 1 },
-                    { time: 0.9, lane: 2 },
-                    { time: 1.1, lane: 3 },
-                    { time: 1.3, lane: 0 },
-                    { time: 1.5, lane: 1 },
-                    { time: 1.7, lane: 2 },
-                    { time: 1.9, lane: 3 },
-                    { time: 2.1, lane: 0 },
-                    { time: 2.3, lane: 1 },
-                    { time: 2.5, lane: 2 },
-                    { time: 2.7, lane: 3 },
-                    { time: 2.9, lane: 0 },
-                    { time: 3.1, lane: 1 },
-                    { time: 3.3, lane: 2 },
-                    { time: 3.5, lane: 3 },
-                    { time: 3.7, lane: 0 },
-                    { time: 3.9, lane: 1 },
-                    { time: 4.1, lane: 2 },
-                    { time: 4.3, lane: 3 },
-                    { time: 4.5, lane: 0 },
-                    { time: 4.7, lane: 1 },
-                    { time: 4.9, lane: 2 },
-                    { time: 5.1, lane: 3 }
-                ]
-            }
-        ];
-        
-        // Active notes
-        let activeNotes = [];
-        
-        // Initialize game
-        function initGame() {
-            // Set up event listeners
-            startButton.addEventListener('click', startGame);
-            pauseButton.addEventListener('click', togglePause);
-            speedSlider.addEventListener('input', updateSpeed);
-            skinSelect.addEventListener('change', updateSkin);
-            
-            // Song selection
-            songItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    songItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                    currentSong = parseInt(this.getAttribute('data-song'));
-                });
-            });
-            
-            // Keyboard input
-            document.addEventListener('keydown', handleKeyPress);
-            
-            // Update speed display
-            updateSpeed();
-        }
-        
-        // Start the game
-        function startGame() {
-            if (gameActive) return;
-            
+        // Initialize the game
+        function init() {
             // Reset game state
-            score = 0;
-            combo = 0;
-            perfectCount = 0;
-            goodCount = 0;
-            missCount = 0;
-            activeNotes = [];
+            zombies = [];
+            bullets = [];
+            powerups = [];
+            weapons = [];
+            currentWeaponIndex = 0;
+            points = 0;
+            wave = 1;
+            zombiesInWave = 5;
+            zombiesKilledThisWave = 0;
+            playerHealth = 100;
+            gameOver = false;
+            powerupActive = false;
+            powerupType = '';
+            powerupTimer = 0;
             
             // Update UI
-            updateScore();
-            updateStats();
+            pointsDisplay.textContent = points;
+            waveDisplay.textContent = wave;
+            zombiesLeftDisplay.textContent = zombiesInWave;
+            healthFill.style.width = '100%';
             
-            // Clear any existing notes
-            document.querySelectorAll('.note').forEach(note => note.remove());
+            // Set up Three.js scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            scene.fog = new THREE.Fog(0x1a1a2e, 10, 50);
             
-            // Start the game
-            gameActive = true;
-            gamePaused = false;
+            // Set up camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 0);
             
-            // Create notes for the selected song
-            const song = songs[currentSong];
-            song.notes.forEach(noteData => {
-                setTimeout(() => {
-                    if (!gamePaused && gameActive) {
-                        createNote(noteData.lane);
-                    }
-                }, noteData.time * 1000);
+            // Set up renderer
+            if (renderer) {
+                document.getElementById('gameContainer').removeChild(renderer.domElement);
+            }
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('gameContainer').appendChild(renderer.domElement);
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Create game environment
+            createEnvironment();
+            
+            // Create player
+            createPlayer();
+            
+            // Create weapons
+            createWeapons();
+            
+            // Start first wave
+            startWave();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Start game loop
+            animate();
+            
+            // Hide start screen
+            startScreen.classList.add('hidden');
+        }
+        
+        // Create the game environment
+        function createEnvironment() {
+            // Ground
+            const groundGeometry = new THREE.PlaneGeometry(100, 100);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2d4059,
+                roughness: 0.8
             });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
             
-            // End game after all notes (plus buffer)
-            setTimeout(() => {
-                if (gameActive) {
-                    endGame();
-                }
-            }, (song.notes[song.notes.length - 1].time + 5) * 1000);
-        }
-        
-        // Toggle pause state
-        function togglePause() {
-            if (!gameActive) return;
+            // Walls (simplified for performance)
+            const wallGeometry = new THREE.BoxGeometry(1, 4, 100);
+            const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x222831 });
             
-            gamePaused = !gamePaused;
-            pauseButton.textContent = gamePaused ? 'Resume' : 'Pause';
-        }
-        
-        // Update scroll speed
-        function updateSpeed() {
-            scrollSpeed = parseInt(speedSlider.value);
-            speedValue.textContent = scrollSpeed;
-        }
-        
-        // Update note skin
-        function updateSkin() {
-            noteSkin = skinSelect.value;
-        }
-        
-        // Create a new note
-        function createNote(laneIndex) {
-            const lane = lanes[laneIndex];
-            const note = document.createElement('div');
-            note.className = `note ${noteSkin}`;
-            note.setAttribute('data-lane', laneIndex);
+            const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            leftWall.position.set(-50, 2, 0);
+            leftWall.castShadow = true;
+            leftWall.receiveShadow = true;
+            scene.add(leftWall);
             
-            // Set note appearance based on skin
-            if (noteSkin === 'arrow') {
-                note.textContent = '↓';
-                note.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
-            } else if (noteSkin === 'circle') {
-                note.textContent = '●';
-                note.style.borderRadius = '50%';
-            } else {
-                note.textContent = '■';
-                note.style.borderRadius = '5px';
+            const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            rightWall.position.set(50, 2, 0);
+            rightWall.castShadow = true;
+            rightWall.receiveShadow = true;
+            scene.add(rightWall);
+            
+            const frontWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            frontWall.rotation.y = Math.PI / 2;
+            frontWall.position.set(0, 2, -50);
+            frontWall.castShadow = true;
+            frontWall.receiveShadow = true;
+            scene.add(frontWall);
+            
+            const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            backWall.rotation.y = Math.PI / 2;
+            backWall.position.set(0, 2, 50);
+            backWall.castShadow = true;
+            backWall.receiveShadow = true;
+            scene.add(backWall);
+            
+            // Add some obstacles
+            const obstacleGeometry = new THREE.BoxGeometry(4, 3, 4);
+            const obstacleMaterial = new THREE.MeshStandardMaterial({ color: 0x393e46 });
+            
+            for (let i = 0; i < 10; i++) {
+                const obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+                obstacle.position.set(
+                    Math.random() * 80 - 40,
+                    1.5,
+                    Math.random() * 80 - 40
+                );
+                obstacle.castShadow = true;
+                obstacle.receiveShadow = true;
+                scene.add(obstacle);
             }
-            
-            lane.appendChild(note);
-            
-            // Add to active notes
-            const noteObj = {
-                element: note,
-                lane: laneIndex,
-                hit: false
+        }
+        
+        // Create the player
+        function createPlayer() {
+            player = {
+                object: new THREE.Object3D(),
+                health: 100,
+                speed: 0.1,
+                isMoving: {
+                    forward: false,
+                    backward: false,
+                    left: false,
+                    right: false
+                }
             };
-            activeNotes.push(noteObj);
             
-            // Animate the note
-            animateNote(note, noteObj);
+            // Player body (invisible, just for collision)
+            const playerGeometry = new THREE.CapsuleGeometry(0.5, 1.5, 4, 8);
+            const playerMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ff00,
+                visible: false // Make player invisible in first-person view
+            });
+            const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
+            playerMesh.position.y = 1.5;
+            player.object.add(playerMesh);
+            
+            // Add camera to player
+            player.object.add(camera);
+            scene.add(player.object);
         }
         
-        // Animate note falling
-        function animateNote(note, noteObj) {
-            const startTime = Date.now();
-            const gameBoard = document.querySelector('.game-board');
-            const hitLine = document.querySelector('.hit-line');
-            const hitLinePosition = hitLine.getBoundingClientRect().top - gameBoard.getBoundingClientRect().top;
-            const startPosition = 0;
-            const endPosition = hitLinePosition;
-            const duration = (endPosition - startPosition) / (scrollSpeed * 10);
+        // Create weapons
+        function createWeapons() {
+            weapons = [
+                {
+                    name: "Pistol",
+                    damage: 25,
+                    fireRate: 500, // ms between shots
+                    ammo: 12,
+                    maxAmmo: 60,
+                    reloadTime: 1500,
+                    mesh: createWeaponMesh(0x666666),
+                    lastShot: 0
+                },
+                {
+                    name: "Shotgun",
+                    damage: 10, // per pellet
+                    fireRate: 1000,
+                    ammo: 6,
+                    maxAmmo: 30,
+                    reloadTime: 2000,
+                    mesh: createWeaponMesh(0x8B4513),
+                    lastShot: 0,
+                    pellets: 8 // number of pellets per shot
+                },
+                {
+                    name: "Assault Rifle",
+                    damage: 15,
+                    fireRate: 150,
+                    ammo: 30,
+                    maxAmmo: 180,
+                    reloadTime: 2000,
+                    mesh: createWeaponMesh(0x2F4F4F),
+                    lastShot: 0
+                },
+                {
+                    name: "Sniper",
+                    damage: 100,
+                    fireRate: 1500,
+                    ammo: 5,
+                    maxAmmo: 20,
+                    reloadTime: 2500,
+                    mesh: createWeaponMesh(0x708090),
+                    lastShot: 0
+                }
+            ];
             
-            function updatePosition() {
-                if (gamePaused || !gameActive) return;
-                
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                note.style.top = `${startPosition + progress * (endPosition - startPosition)}px`;
-                
-                // Check if note passed the hit line without being hit
-                if (progress >= 1 && !noteObj.hit) {
-                    missNote(noteObj);
-                }
-                
-                if (progress < 1 && gameActive) {
-                    requestAnimationFrame(updatePosition);
-                }
+            // Position the current weapon in front of the camera
+            weapons[currentWeaponIndex].mesh.position.set(0.5, -0.5, -1);
+            camera.add(weapons[currentWeaponIndex].mesh);
+            
+            updateWeaponDisplay();
+        }
+        
+        // Create a simple weapon mesh
+        function createWeaponMesh(color) {
+            const group = new THREE.Group();
+            
+            // Weapon body
+            const bodyGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.6);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: color });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.z = -0.3;
+            group.add(body);
+            
+            // Weapon handle
+            const handleGeometry = new THREE.BoxGeometry(0.05, 0.2, 0.1);
+            const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+            handle.position.set(0, -0.15, -0.1);
+            group.add(handle);
+            
+            return group;
+        }
+        
+        // Start a new wave
+        function startWave() {
+            zombiesKilledThisWave = 0;
+            zombiesInWave = 5 + wave * 2;
+            
+            waveDisplay.textContent = wave;
+            zombiesLeftDisplay.textContent = zombiesInWave;
+            
+            // Show wave info
+            waveInfoDisplay.textContent = `Wave ${wave}`;
+            waveInfoDisplay.style.opacity = 1;
+            
+            setTimeout(() => {
+                waveInfoDisplay.style.opacity = 0;
+            }, 3000);
+            
+            // Spawn initial zombies
+            for (let i = 0; i < Math.min(5, zombiesInWave); i++) {
+                spawnZombie();
             }
-            
-            requestAnimationFrame(updatePosition);
         }
         
-        // Handle keyboard input
-        function handleKeyPress(e) {
-            if (!gameActive || gamePaused) return;
+        // Spawn a zombie
+        function spawnZombie() {
+            const zombieGeometry = new THREE.CapsuleGeometry(0.5, 1.5, 4, 8);
+            const zombieMaterial = new THREE.MeshStandardMaterial({ color: 0x00aa00 });
+            const zombieMesh = new THREE.Mesh(zombieGeometry, zombieMaterial);
+            zombieMesh.castShadow = true;
             
-            const key = e.key.toUpperCase();
-            const laneIndex = ['D', 'F', 'J', 'K'].indexOf(key);
+            // Position zombie randomly around the player
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 20 + Math.random() * 20;
+            const x = Math.cos(angle) * distance;
+            const z = Math.sin(angle) * distance;
             
-            if (laneIndex !== -1) {
-                // Check for notes to hit in this lane
-                const notesInLane = activeNotes.filter(note => 
-                    note.lane === laneIndex && !note.hit
+            zombieMesh.position.set(x, 1.5, z);
+            
+            const zombie = {
+                mesh: zombieMesh,
+                health: 50 + wave * 10,
+                speed: 0.02 + Math.random() * 0.01,
+                damage: 10
+            };
+            
+            zombies.push(zombie);
+            scene.add(zombieMesh);
+        }
+        
+        // Spawn a power-up
+        function spawnPowerup() {
+            if (Math.random() < 0.02 && !powerupActive && powerups.length === 0) { // 2% chance per frame when no power-up is active
+                const powerupTypes = ['health', 'ammo', 'doubleDamage', 'speed'];
+                const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                
+                const powerupGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                let powerupMaterial;
+                
+                switch(type) {
+                    case 'health':
+                        powerupMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+                        break;
+                    case 'ammo':
+                        powerupMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+                        break;
+                    case 'doubleDamage':
+                        powerupMaterial = new THREE.MeshStandardMaterial({ color: 0xff00ff });
+                        break;
+                    case 'speed':
+                        powerupMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff });
+                        break;
+                }
+                
+                const powerupMesh = new THREE.Mesh(powerupGeometry, powerupMaterial);
+                powerupMesh.position.set(
+                    Math.random() * 80 - 40,
+                    0.5,
+                    Math.random() * 80 - 40
                 );
                 
-                if (notesInLane.length > 0) {
-                    // Find the closest note to the hit line
-                    const closestNote = notesInLane.reduce((closest, note) => {
-                        const noteRect = note.element.getBoundingClientRect();
-                        const hitLineRect = document.querySelector('.hit-line').getBoundingClientRect();
-                        const distance = Math.abs(noteRect.bottom - hitLineRect.top);
-                        return distance < closest.distance ? { note, distance } : closest;
-                    }, { note: null, distance: Infinity });
-                    
-                    if (closestNote.note) {
-                        hitNote(closestNote.note, closestNote.distance);
-                    }
-                }
+                const powerup = {
+                    mesh: powerupMesh,
+                    type: type
+                };
+                
+                powerups.push(powerup);
+                scene.add(powerupMesh);
             }
         }
         
-        // Hit a note
-        function hitNote(noteObj, distance) {
-            noteObj.hit = true;
+        // Set up event listeners
+        function setupEventListeners() {
+            // Movement
+            document.addEventListener('keydown', (e) => {
+                if (gameOver) return;
+                
+                switch(e.code) {
+                    case 'KeyW':
+                        player.isMoving.forward = true;
+                        break;
+                    case 'KeyS':
+                        player.isMoving.backward = true;
+                        break;
+                    case 'KeyA':
+                        player.isMoving.left = true;
+                        break;
+                    case 'KeyD':
+                        player.isMoving.right = true;
+                        break;
+                    case 'Digit1':
+                        switchWeapon(0);
+                        break;
+                    case 'Digit2':
+                        switchWeapon(1);
+                        break;
+                    case 'Digit3':
+                        switchWeapon(2);
+                        break;
+                    case 'Digit4':
+                        switchWeapon(3);
+                        break;
+                    case 'KeyR':
+                        reloadWeapon();
+                        break;
+                }
+            });
             
-            // Calculate score based on timing
-            let points = 0;
-            let judgment = '';
+            document.addEventListener('keyup', (e) => {
+                switch(e.code) {
+                    case 'KeyW':
+                        player.isMoving.forward = false;
+                        break;
+                    case 'KeyS':
+                        player.isMoving.backward = false;
+                        break;
+                    case 'KeyA':
+                        player.isMoving.left = false;
+                        break;
+                    case 'KeyD':
+                        player.isMoving.right = false;
+                        break;
+                }
+            });
             
-            if (distance < 10) {
-                // Perfect
-                points = 300;
-                judgment = 'Perfect';
-                perfectCount++;
-                combo++;
-            } else if (distance < 30) {
-                // Good
-                points = 100;
-                judgment = 'Good';
-                goodCount++;
-                combo++;
+            // Shooting
+            document.addEventListener('click', shoot);
+            
+            // Mouse movement for looking around
+            let isPointerLocked = false;
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isPointerLocked && !gameOver) {
+                    player.object.rotation.y -= e.movementX * 0.002;
+                    camera.rotation.x -= e.movementY * 0.002;
+                    
+                    // Limit vertical look
+                    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+                }
+            });
+            
+            // Pointer lock
+            renderer.domElement.addEventListener('click', () => {
+                if (!isPointerLocked && !gameOver) {
+                    renderer.domElement.requestPointerLock();
+                }
+            });
+            
+            document.addEventListener('pointerlockchange', () => {
+                isPointerLocked = document.pointerLockElement === renderer.domElement;
+            });
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Start and restart buttons
+            startButton.addEventListener('click', init);
+            restartButton.addEventListener('click', () => {
+                gameOverScreen.classList.add('hidden');
+                init();
+            });
+        }
+        
+        // Switch weapon
+        function switchWeapon(index) {
+            if (index < 0 || index >= weapons.length || index === currentWeaponIndex) return;
+            
+            // Remove current weapon from camera
+            camera.remove(weapons[currentWeaponIndex].mesh);
+            
+            // Set new weapon
+            currentWeaponIndex = index;
+            weapons[currentWeaponIndex].mesh.position.set(0.5, -0.5, -1);
+            camera.add(weapons[currentWeaponIndex].mesh);
+            
+            updateWeaponDisplay();
+        }
+        
+        // Reload weapon
+        function reloadWeapon() {
+            const weapon = weapons[currentWeaponIndex];
+            if (weapon.ammo === weapon.maxAmmo) return; // Already full
+            
+            const ammoNeeded = weapon.maxAmmo - weapon.ammo;
+            weapon.ammo += ammoNeeded;
+            
+            updateWeaponDisplay();
+        }
+        
+        // Shoot weapon
+        function shoot() {
+            if (gameOver) return;
+            
+            const weapon = weapons[currentWeaponIndex];
+            const now = Date.now();
+            
+            // Check if can shoot (ammo and fire rate)
+            if (weapon.ammo <= 0 || now - weapon.lastShot < weapon.fireRate) return;
+            
+            weapon.ammo--;
+            weapon.lastShot = now;
+            
+            updateWeaponDisplay();
+            
+            // Create bullet direction based on camera rotation
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            
+            if (weapon.name === "Shotgun") {
+                // Shotgun fires multiple pellets
+                for (let i = 0; i < weapon.pellets; i++) {
+                    const spread = 0.1;
+                    const pelletDirection = direction.clone();
+                    pelletDirection.x += (Math.random() - 0.5) * spread;
+                    pelletDirection.y += (Math.random() - 0.5) * spread;
+                    pelletDirection.z += (Math.random() - 0.5) * spread;
+                    pelletDirection.normalize();
+                    
+                    createBullet(pelletDirection, weapon.damage);
+                }
             } else {
-                // Miss (too early)
-                points = 0;
-                judgment = 'Miss';
-                missCount++;
-                combo = 0;
+                createBullet(direction, weapon.damage);
             }
             
-            // Add combo bonus
-            points += combo * 10;
-            
-            // Update score
-            score += points;
-            updateScore();
-            updateStats();
-            
-            // Visual feedback
-            noteObj.element.style.transform = 'scale(1.2)';
-            noteObj.element.style.opacity = '0.7';
-            
-            // Remove note after a short delay
+            // Weapon recoil animation
+            weapons[currentWeaponIndex].mesh.position.z += 0.1;
             setTimeout(() => {
-                if (noteObj.element.parentNode) {
-                    noteObj.element.parentNode.removeChild(noteObj.element);
-                }
-                
-                // Remove from active notes
-                const index = activeNotes.indexOf(noteObj);
-                if (index > -1) {
-                    activeNotes.splice(index, 1);
-                }
+                weapons[currentWeaponIndex].mesh.position.z -= 0.1;
             }, 100);
         }
         
-        // Miss a note
-        function missNote(noteObj) {
-            noteObj.hit = true;
-            missCount++;
-            combo = 0;
-            updateScore();
-            updateStats();
+        // Create a bullet
+        function createBullet(direction, damage) {
+            const bullet = {
+                position: camera.position.clone(),
+                direction: direction,
+                speed: 0.5,
+                damage: damage,
+                distance: 0,
+                maxDistance: 50
+            };
             
-            // Visual feedback for miss
-            noteObj.element.style.backgroundColor = '#ff4757';
-            noteObj.element.style.boxShadow = '0 0 10px rgba(255, 71, 87, 0.7)';
-            
-            // Remove note after a short delay
+            bullets.push(bullet);
+        }
+        
+        // Update weapon display
+        function updateWeaponDisplay() {
+            const weapon = weapons[currentWeaponIndex];
+            weaponNameDisplay.textContent = weapon.name;
+            ammoCountDisplay.textContent = `${weapon.ammo} / ${weapon.maxAmmo}`;
+        }
+        
+        // Show hit marker
+        function showHitMarker() {
+            hitMarker.style.opacity = 1;
             setTimeout(() => {
-                if (noteObj.element.parentNode) {
-                    noteObj.element.parentNode.removeChild(noteObj.element);
+                hitMarker.style.opacity = 0;
+            }, 100);
+        }
+        
+        // Show damage number
+        function showDamageNumber(position, damage) {
+            const damageElement = document.createElement('div');
+            damageElement.className = 'damageNumber';
+            damageElement.textContent = damage;
+            damageElement.style.left = '50%';
+            damageElement.style.top = '50%';
+            document.getElementById('uiContainer').appendChild(damageElement);
+            
+            setTimeout(() => {
+                document.getElementById('uiContainer').removeChild(damageElement);
+            }, 1000);
+        }
+        
+        // Activate power-up
+        function activatePowerup(type) {
+            powerupActive = true;
+            powerupType = type;
+            powerupTimer = 10000; // 10 seconds
+            
+            powerupIndicator.textContent = 
+                type === 'health' ? 'Health Restored!' :
+                type === 'ammo' ? 'Ammo Refilled!' :
+                type === 'doubleDamage' ? 'Double Damage Active!' :
+                'Speed Boost Active!';
+            
+            powerupIndicator.style.opacity = 1;
+            
+            // Apply power-up effect
+            switch(type) {
+                case 'health':
+                    playerHealth = Math.min(100, playerHealth + 50);
+                    healthFill.style.width = `${playerHealth}%`;
+                    break;
+                case 'ammo':
+                    weapons.forEach(weapon => {
+                        weapon.ammo = weapon.maxAmmo;
+                    });
+                    updateWeaponDisplay();
+                    break;
+                case 'doubleDamage':
+                    // Effect applied in damage calculation
+                    break;
+                case 'speed':
+                    player.speed = 0.15;
+                    break;
+            }
+            
+            setTimeout(() => {
+                powerupIndicator.style.opacity = 0;
+            }, 3000);
+        }
+        
+        // Game over
+        function endGame() {
+            gameOver = true;
+            gameOverScreen.classList.remove('hidden');
+            finalWaveDisplay.textContent = wave;
+            finalPointsDisplay.textContent = points;
+            
+            // Exit pointer lock
+            document.exitPointerLock();
+        }
+        
+        // Main game loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (gameOver) return;
+            
+            // Move player
+            const moveDirection = new THREE.Vector3();
+            const playerRotation = player.object.rotation.y;
+            
+            if (player.isMoving.forward) {
+                moveDirection.z -= 1;
+            }
+            if (player.isMoving.backward) {
+                moveDirection.z += 1;
+            }
+            if (player.isMoving.left) {
+                moveDirection.x -= 1;
+            }
+            if (player.isMoving.right) {
+                moveDirection.x += 1;
+            }
+            
+            moveDirection.normalize();
+            moveDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRotation);
+            
+            const speed = powerupType === 'speed' ? player.speed * 1.5 : player.speed;
+            player.object.position.add(moveDirection.multiplyScalar(speed));
+            
+            // Keep player within bounds
+            player.object.position.x = Math.max(-45, Math.min(45, player.object.position.x));
+            player.object.position.z = Math.max(-45, Math.min(45, player.object.position.z));
+            
+            // Update bullets
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                bullet.position.add(bullet.direction.clone().multiplyScalar(bullet.speed));
+                bullet.distance += bullet.speed;
+                
+                // Check for bullet hit
+                let hit = false;
+                for (let j = zombies.length - 1; j >= 0; j--) {
+                    const zombie = zombies[j];
+                    const distance = bullet.position.distanceTo(zombie.mesh.position);
+                    
+                    if (distance < 1) {
+                        // Hit zombie
+                        let damage = bullet.damage;
+                        if (powerupActive && powerupType === 'doubleDamage') {
+                            damage *= 2;
+                        }
+                        
+                        zombie.health -= damage;
+                        points += damage;
+                        pointsDisplay.textContent = points;
+                        
+                        showHitMarker();
+                        showDamageNumber(zombie.mesh.position, damage);
+                        
+                        if (zombie.health <= 0) {
+                            // Zombie killed
+                            scene.remove(zombie.mesh);
+                            zombies.splice(j, 1);
+                            zombiesKilledThisWave++;
+                            points += 100;
+                            pointsDisplay.textContent = points;
+                            
+                            // Check if wave is complete
+                            if (zombiesKilledThisWave >= zombiesInWave) {
+                                wave++;
+                                setTimeout(startWave, 2000);
+                            }
+                        }
+                        
+                        hit = true;
+                        break;
+                    }
                 }
                 
-                // Remove from active notes
-                const index = activeNotes.indexOf(noteObj);
-                if (index > -1) {
-                    activeNotes.splice(index, 1);
+                // Remove bullet if it hit something or reached max distance
+                if (hit || bullet.distance >= bullet.maxDistance) {
+                    bullets.splice(i, 1);
                 }
-            }, 300);
-        }
-        
-        // Update score display
-        function updateScore() {
-            scoreElement.textContent = score;
-            comboElement.textContent = combo;
-        }
-        
-        // Update statistics
-        function updateStats() {
-            perfectCountElement.textContent = perfectCount;
-            goodCountElement.textContent = goodCount;
-            missCountElement.textContent = missCount;
-        }
-        
-        // End the game
-        function endGame() {
-            gameActive = false;
-            gamePaused = false;
+            }
             
-            // Clear any remaining notes
-            document.querySelectorAll('.note').forEach(note => note.remove());
-            activeNotes = [];
+            // Update zombies
+            zombiesLeftDisplay.textContent = zombiesInWave - zombiesKilledThisWave;
             
-            // Show final score
-            alert(`Game Over!\nFinal Score: ${score}\nMax Combo: ${combo}\nPerfect: ${perfectCount}\nGood: ${goodCount}\nMiss: ${missCount}`);
+            for (let i = 0; i < zombies.length; i++) {
+                const zombie = zombies[i];
+                
+                // Move towards player
+                const direction = new THREE.Vector3();
+                direction.subVectors(player.object.position, zombie.mesh.position);
+                direction.y = 0;
+                direction.normalize();
+                
+                zombie.mesh.position.add(direction.multiplyScalar(zombie.speed));
+                zombie.mesh.lookAt(player.object.position);
+                
+                // Check for zombie attack
+                const distanceToPlayer = zombie.mesh.position.distanceTo(player.object.position);
+                if (distanceToPlayer < 1.5) {
+                    // Zombie attacks player
+                    playerHealth -= zombie.damage * 0.1; // Reduced damage for gameplay balance
+                    healthFill.style.width = `${playerHealth}%`;
+                    
+                    if (playerHealth <= 0) {
+                        endGame();
+                    }
+                }
+            }
+            
+            // Spawn more zombies if needed
+            if (zombies.length < Math.min(5 + wave, zombiesInWave - zombiesKilledThisWave)) {
+                if (Math.random() < 0.02) {
+                    spawnZombie();
+                }
+            }
+            
+            // Spawn power-ups
+            spawnPowerup();
+            
+            // Update power-ups
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                
+                // Check if player collected power-up
+                const distanceToPlayer = powerup.mesh.position.distanceTo(player.object.position);
+                if (distanceToPlayer < 1.5) {
+                    activatePowerup(powerup.type);
+                    scene.remove(powerup.mesh);
+                    powerups.splice(i, 1);
+                }
+            }
+            
+            // Update power-up timer
+            if (powerupActive) {
+                powerupTimer -= 16; // Assuming 60fps
+                
+                if (powerupTimer <= 0) {
+                    powerupActive = false;
+                    
+                    // Reset effects
+                    if (powerupType === 'doubleDamage') {
+                        // Effect automatically stops being applied
+                    } else if (powerupType === 'speed') {
+                        player.speed = 0.1;
+                    }
+                }
+            }
+            
+            // Render scene
+            renderer.render(scene, camera);
         }
         
-        // Initialize the game when the page loads
-        window.addEventListener('load', initGame);
+        // Initialize event listeners for start and restart buttons
+        startButton.addEventListener('click', init);
+        restartButton.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            init();
+        });
     </script>
 </body>
 </html>
