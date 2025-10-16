@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 150, 255, 0.7);
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-area {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #4cc9f0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .song-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .song-item:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .song-item.active {
+            border-color: #4cc9f0;
+            background: rgba(76, 201, 240, 0.2);
+        }
+
+        .song-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .song-difficulty {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .settings-option {
+            margin-bottom: 15px;
+        }
+
+        .settings-option label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-container input {
+            flex: 1;
+        }
+
+        .slider-value {
+            width: 40px;
+            text-align: center;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, button:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        button {
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 180, 219, 0.4);
+        }
+
+        .game-board {
+            width: 100%;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .lanes {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .lane {
+            flex: 1;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .lane:last-child {
+            border-right: none;
+        }
+
+        .hit-line {
+            position: absolute;
+            bottom: 100px;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+        }
+
+        .note {
+            position: absolute;
+            width: 80%;
+            height: 30px;
+            left: 10%;
+            border-radius: 5px;
+            background: #4cc9f0;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+            transition: transform 0.1s;
+        }
+
+        .score-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+        }
+
+        .combo-display {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #4cc9f0;
+            margin-bottom: 20px;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .stat {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4cc9f0;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .skin-preview {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .skin-sample {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: #4cc9f0;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+        }
+
+        .skin-sample.circle {
+            border-radius: 50%;
+        }
+
+        .skin-sample.arrow {
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .game-board {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">Rhythm Game</h1>
+    
+    <div class="container">
+        <div class="left-panel">
+            <div class="panel song-selector">
+                <h2 class="panel-title">Song Selection</h2>
+                <div class="song-list">
+                    <div class="song-item active" data-song="0">
+                        <div class="song-title">Melodic Dreams</div>
+                        <div class="song-difficulty">Difficulty: Easy</div>
+                    </div>
+                    <div class="song-item" data-song="1">
+                        <div class="song-title">Rhythm Rush</div>
+                        <div class="song-difficulty">Difficulty: Medium</div>
+                    </div>
+                    <div class="song-item" data-song="2">
+                        <div class="song-title">Beat Blitz</div>
+                        <div class="song-difficulty">Difficulty: Hard</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel settings">
+                <h2 class="panel-title">Game Settings</h2>
+                
+                <div class="settings-option">
+                    <label for="speed">Scroll Speed</label>
+                    <div class="slider-container">
+                        <input type="range" id="speed" min="1" max="10" value="5">
+                        <span class="slider-value" id="speed-value">5</span>
+                    </div>
+                </div>
+                
+                <div class="settings-option">
+                    <label for="skin">Note Skin</label>
+                    <select id="skin">
+                        <option value="arrow">Arrows</option>
+                        <option value="circle">Circles</option>
+                        <option value="square">Squares</option>
+                    </select>
+                    <div class="skin-preview">
+                        <div class="skin-sample arrow">↓</div>
+                        <div class="skin-sample circle">●</div>
+                        <div class="skin-sample square">■</div>
+                    </div>
+                </div>
+                
+                <button id="start-btn">Start Game</button>
+                <button id="pause-btn">Pause</button>
+            </div>
+            
+            <div class="panel instructions">
+                <h2 class="panel-title">How to Play</h2>
+                <p>Press the keys <strong>D, F, J, K</strong> to hit the notes as they reach the hit line.</p>
+                <p>Timing is everything! Perfect hits give more points.</p>
+                <p>Adjust the scroll speed to match your preference.</p>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="score-display">Score: <span id="score">0</span></div>
+            <div class="combo-display">Combo: <span id="combo">0</span>x</div>
+            
+            <div class="game-board">
+                <div class="lanes">
+                    <div class="lane" data-key="D"></div>
+                    <div class="lane" data-key="F"></div>
+                    <div class="lane" data-key="J"></div>
+                    <div class="lane" data-key="K"></div>
+                    <div class="hit-line"></div>
+                </div>
+            </div>
+            
+            <div class="game-stats">
+                <div class="stat">
+                    <div>Perfect</div>
+                    <div class="stat-value" id="perfect-count">0</div>
+                </div>
+                <div class="stat">
+                    <div>Good</div>
+                    <div class="stat-value" id="good-count">0</div>
+                </div>
+                <div class="stat">
+                    <div>Miss</div>
+                    <div class="stat-value" id="miss-count">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let score = 0;
+        let combo = 0;
+        let gameActive = false;
+        let gamePaused = false;
+        let currentSong = 0;
+        let scrollSpeed = 5;
+        let noteSkin = 'arrow';
+        
+        // Statistics
+        let perfectCount = 0;
+        let goodCount = 0;
+        let missCount = 0;
+        
+        // DOM elements
+        const scoreElement = document.getElementById('score');
+        const comboElement = document.getElementById('combo');
+        const startButton = document.getElementById('start-btn');
+        const pauseButton = document.getElementById('pause-btn');
+        const speedSlider = document.getElementById('speed');
+        const speedValue = document.getElementById('speed-value');
+        const skinSelect = document.getElementById('skin');
+        const perfectCountElement = document.getElementById('perfect-count');
+        const goodCountElement = document.getElementById('good-count');
+        const missCountElement = document.getElementById('miss-count');
+        const lanes = document.querySelectorAll('.lane');
+        const songItems = document.querySelectorAll('.song-item');
+        
+        // Note data for each song (time in seconds, lane index 0-3)
+        const songs = [
+            {
+                title: "Melodic Dreams",
+                difficulty: "Easy",
+                notes: [
+                    { time: 1, lane: 0 },
+                    { time: 1.5, lane: 1 },
+                    { time: 2, lane: 2 },
+                    { time: 2.5, lane: 3 },
+                    { time: 3, lane: 0 },
+                    { time: 3.5, lane: 1 },
+                    { time: 4, lane: 2 },
+                    { time: 4.5, lane: 3 },
+                    { time: 5, lane: 0 },
+                    { time: 5.5, lane: 1 },
+                    { time: 6, lane: 2 },
+                    { time: 6.5, lane: 3 },
+                    { time: 7, lane: 0 },
+                    { time: 7.5, lane: 1 },
+                    { time: 8, lane: 2 },
+                    { time: 8.5, lane: 3 },
+                    { time: 9, lane: 0 },
+                    { time: 9.5, lane: 1 },
+                    { time: 10, lane: 2 },
+                    { time: 10.5, lane: 3 }
+                ]
+            },
+            {
+                title: "Rhythm Rush",
+                difficulty: "Medium",
+                notes: [
+                    { time: 1, lane: 0 },
+                    { time: 1.2, lane: 1 },
+                    { time: 1.4, lane: 2 },
+                    { time: 1.6, lane: 3 },
+                    { time: 2, lane: 0 },
+                    { time: 2.2, lane: 1 },
+                    { time: 2.4, lane: 2 },
+                    { time: 2.6, lane: 3 },
+                    { time: 3, lane: 0 },
+                    { time: 3.2, lane: 1 },
+                    { time: 3.4, lane: 2 },
+                    { time: 3.6, lane: 3 },
+                    { time: 4, lane: 0 },
+                    { time: 4.2, lane: 1 },
+                    { time: 4.4, lane: 2 },
+                    { time: 4.6, lane: 3 },
+                    { time: 5, lane: 0 },
+                    { time: 5.2, lane: 1 },
+                    { time: 5.4, lane: 2 },
+                    { time: 5.6, lane: 3 },
+                    { time: 6, lane: 0 },
+                    { time: 6.2, lane: 1 },
+                    { time: 6.4, lane: 2 },
+                    { time: 6.6, lane: 3 }
+                ]
+            },
+            {
+                title: "Beat Blitz",
+                difficulty: "Hard",
+                notes: [
+                    { time: 0.5, lane: 0 },
+                    { time: 0.7, lane: 1 },
+                    { time: 0.9, lane: 2 },
+                    { time: 1.1, lane: 3 },
+                    { time: 1.3, lane: 0 },
+                    { time: 1.5, lane: 1 },
+                    { time: 1.7, lane: 2 },
+                    { time: 1.9, lane: 3 },
+                    { time: 2.1, lane: 0 },
+                    { time: 2.3, lane: 1 },
+                    { time: 2.5, lane: 2 },
+                    { time: 2.7, lane: 3 },
+                    { time: 2.9, lane: 0 },
+                    { time: 3.1, lane: 1 },
+                    { time: 3.3, lane: 2 },
+                    { time: 3.5, lane: 3 },
+                    { time: 3.7, lane: 0 },
+                    { time: 3.9, lane: 1 },
+                    { time: 4.1, lane: 2 },
+                    { time: 4.3, lane: 3 },
+                    { time: 4.5, lane: 0 },
+                    { time: 4.7, lane: 1 },
+                    { time: 4.9, lane: 2 },
+                    { time: 5.1, lane: 3 }
+                ]
+            }
+        ];
+        
+        // Active notes
+        let activeNotes = [];
+        
+        // Initialize game
+        function initGame() {
+            // Set up event listeners
+            startButton.addEventListener('click', startGame);
+            pauseButton.addEventListener('click', togglePause);
+            speedSlider.addEventListener('input', updateSpeed);
+            skinSelect.addEventListener('change', updateSkin);
+            
+            // Song selection
+            songItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    songItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    currentSong = parseInt(this.getAttribute('data-song'));
+                });
+            });
+            
+            // Keyboard input
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Update speed display
+            updateSpeed();
+        }
+        
+        // Start the game
+        function startGame() {
+            if (gameActive) return;
+            
+            // Reset game state
+            score = 0;
+            combo = 0;
+            perfectCount = 0;
+            goodCount = 0;
+            missCount = 0;
+            activeNotes = [];
+            
+            // Update UI
+            updateScore();
+            updateStats();
+            
+            // Clear any existing notes
+            document.querySelectorAll('.note').forEach(note => note.remove());
+            
+            // Start the game
+            gameActive = true;
+            gamePaused = false;
+            
+            // Create notes for the selected song
+            const song = songs[currentSong];
+            song.notes.forEach(noteData => {
+                setTimeout(() => {
+                    if (!gamePaused && gameActive) {
+                        createNote(noteData.lane);
+                    }
+                }, noteData.time * 1000);
+            });
+            
+            // End game after all notes (plus buffer)
+            setTimeout(() => {
+                if (gameActive) {
+                    endGame();
+                }
+            }, (song.notes[song.notes.length - 1].time + 5) * 1000);
+        }
+        
+        // Toggle pause state
+        function togglePause() {
+            if (!gameActive) return;
+            
+            gamePaused = !gamePaused;
+            pauseButton.textContent = gamePaused ? 'Resume' : 'Pause';
+        }
+        
+        // Update scroll speed
+        function updateSpeed() {
+            scrollSpeed = parseInt(speedSlider.value);
+            speedValue.textContent = scrollSpeed;
+        }
+        
+        // Update note skin
+        function updateSkin() {
+            noteSkin = skinSelect.value;
+        }
+        
+        // Create a new note
+        function createNote(laneIndex) {
+            const lane = lanes[laneIndex];
+            const note = document.createElement('div');
+            note.className = `note ${noteSkin}`;
+            note.setAttribute('data-lane', laneIndex);
+            
+            // Set note appearance based on skin
+            if (noteSkin === 'arrow') {
+                note.textContent = '↓';
+                note.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+            } else if (noteSkin === 'circle') {
+                note.textContent = '●';
+                note.style.borderRadius = '50%';
+            } else {
+                note.textContent = '■';
+                note.style.borderRadius = '5px';
+            }
+            
+            lane.appendChild(note);
+            
+            // Add to active notes
+            const noteObj = {
+                element: note,
+                lane: laneIndex,
+                hit: false
+            };
+            activeNotes.push(noteObj);
+            
+            // Animate the note
+            animateNote(note, noteObj);
+        }
+        
+        // Animate note falling
+        function animateNote(note, noteObj) {
+            const startTime = Date.now();
+            const gameBoard = document.querySelector('.game-board');
+            const hitLine = document.querySelector('.hit-line');
+            const hitLinePosition = hitLine.getBoundingClientRect().top - gameBoard.getBoundingClientRect().top;
+            const startPosition = 0;
+            const endPosition = hitLinePosition;
+            const duration = (endPosition - startPosition) / (scrollSpeed * 10);
+            
+            function updatePosition() {
+                if (gamePaused || !gameActive) return;
+                
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                note.style.top = `${startPosition + progress * (endPosition - startPosition)}px`;
+                
+                // Check if note passed the hit line without being hit
+                if (progress >= 1 && !noteObj.hit) {
+                    missNote(noteObj);
+                }
+                
+                if (progress < 1 && gameActive) {
+                    requestAnimationFrame(updatePosition);
+                }
+            }
+            
+            requestAnimationFrame(updatePosition);
+        }
+        
+        // Handle keyboard input
+        function handleKeyPress(e) {
+            if (!gameActive || gamePaused) return;
+            
+            const key = e.key.toUpperCase();
+            const laneIndex = ['D', 'F', 'J', 'K'].indexOf(key);
+            
+            if (laneIndex !== -1) {
+                // Check for notes to hit in this lane
+                const notesInLane = activeNotes.filter(note => 
+                    note.lane === laneIndex && !note.hit
+                );
+                
+                if (notesInLane.length > 0) {
+                    // Find the closest note to the hit line
+                    const closestNote = notesInLane.reduce((closest, note) => {
+                        const noteRect = note.element.getBoundingClientRect();
+                        const hitLineRect = document.querySelector('.hit-line').getBoundingClientRect();
+                        const distance = Math.abs(noteRect.bottom - hitLineRect.top);
+                        return distance < closest.distance ? { note, distance } : closest;
+                    }, { note: null, distance: Infinity });
+                    
+                    if (closestNote.note) {
+                        hitNote(closestNote.note, closestNote.distance);
+                    }
+                }
+            }
+        }
+        
+        // Hit a note
+        function hitNote(noteObj, distance) {
+            noteObj.hit = true;
+            
+            // Calculate score based on timing
+            let points = 0;
+            let judgment = '';
+            
+            if (distance < 10) {
+                // Perfect
+                points = 300;
+                judgment = 'Perfect';
+                perfectCount++;
+                combo++;
+            } else if (distance < 30) {
+                // Good
+                points = 100;
+                judgment = 'Good';
+                goodCount++;
+                combo++;
+            } else {
+                // Miss (too early)
+                points = 0;
+                judgment = 'Miss';
+                missCount++;
+                combo = 0;
+            }
+            
+            // Add combo bonus
+            points += combo * 10;
+            
+            // Update score
+            score += points;
+            updateScore();
+            updateStats();
+            
+            // Visual feedback
+            noteObj.element.style.transform = 'scale(1.2)';
+            noteObj.element.style.opacity = '0.7';
+            
+            // Remove note after a short delay
+            setTimeout(() => {
+                if (noteObj.element.parentNode) {
+                    noteObj.element.parentNode.removeChild(noteObj.element);
+                }
+                
+                // Remove from active notes
+                const index = activeNotes.indexOf(noteObj);
+                if (index > -1) {
+                    activeNotes.splice(index, 1);
+                }
+            }, 100);
+        }
+        
+        // Miss a note
+        function missNote(noteObj) {
+            noteObj.hit = true;
+            missCount++;
+            combo = 0;
+            updateScore();
+            updateStats();
+            
+            // Visual feedback for miss
+            noteObj.element.style.backgroundColor = '#ff4757';
+            noteObj.element.style.boxShadow = '0 0 10px rgba(255, 71, 87, 0.7)';
+            
+            // Remove note after a short delay
+            setTimeout(() => {
+                if (noteObj.element.parentNode) {
+                    noteObj.element.parentNode.removeChild(noteObj.element);
+                }
+                
+                // Remove from active notes
+                const index = activeNotes.indexOf(noteObj);
+                if (index > -1) {
+                    activeNotes.splice(index, 1);
+                }
+            }, 300);
+        }
+        
+        // Update score display
+        function updateScore() {
+            scoreElement.textContent = score;
+            comboElement.textContent = combo;
+        }
+        
+        // Update statistics
+        function updateStats() {
+            perfectCountElement.textContent = perfectCount;
+            goodCountElement.textContent = goodCount;
+            missCountElement.textContent = missCount;
+        }
+        
+        // End the game
+        function endGame() {
+            gameActive = false;
+            gamePaused = false;
+            
+            // Clear any remaining notes
+            document.querySelectorAll('.note').forEach(note => note.remove());
+            activeNotes = [];
+            
+            // Show final score
+            alert(`Game Over!\nFinal Score: ${score}\nMax Combo: ${combo}\nPerfect: ${perfectCount}\nGood: ${goodCount}\nMiss: ${missCount}`);
+        }
+        
+        // Initialize the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
